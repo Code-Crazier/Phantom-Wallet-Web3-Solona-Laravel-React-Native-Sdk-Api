@@ -1,0 +1,146 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Phantom Wallet</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Open+Sans" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.css" integrity="sha256-fmMNkMcjSw3xcp9iuPnku/ryk9kaWgrEbfJfKmdZ45o=" crossorigin="anonymous" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.0/moment.min.js" integrity="sha256-Mwee5t+bD35zhwF9nGFf7szo0kMlILdBFdSK5xPQaTI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.4.0/bootbox.min.js"></script>
+
+    {{#css login}}
+    {{#javascript wallet}}
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="col-md-4 col-md-offset-4 col-sm-12 login-panel" style="text-align:center;border: 4px solid #17B0E7;height: 800px;">
+            <div id="logo-container">
+                <img src="/img/soul_logo.png" id="logo-img" />
+                <span style="font-size:2em;">PHANTOM</span><br>
+                <span style="font-size:2em;">WALLET</span><br>
+                <span style="font-size:1em;color:#7C95AB;">version <span id="version">0.8.7</span></span>
+            </div>
+            <div style="display:table;margin:0 auto;">
+              <ul class="nav nav-tabs" id="myTab" role="tablist">
+                  <li class="nav-item">
+                      <a class="nav-link active" id="login-tab" data-toggle="tab" href="#login" role="tab" aria-controls="login" aria-selected="true">LOGIN</a>
+                  </li>
+                  <li class="nav-item" style="margin-left: 1em;">
+                      <a class="nav-link" id="create-tab" data-toggle="tab" href="#create" role="tab" aria-controls="create" aria-selected="false">CREATE ACCOUNT</a>
+                  </li>
+              </ul>
+            </div>
+
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade active" id="login" role="tabpanel" aria-labelledby="login-tab">
+                    <form action="" id="loginForm" style="width: 100%;">
+                        <div class="form-group input-group" style="width: 100%;padding-bottom: 40px;">
+                            <label for="private_key" class="login-label" style="font-weight:400;">Enter Private Key (WIF)</label>
+                            <input class="form-control" type="password" name='private_key' id='private_key' />
+                        </div>
+                        <div class="alert alert-warning" id="new-version" role="alert" style="margin-top: 1em;display:none">
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-primary btn-block btn-phantasma" id='login-button' onclick="onLogin()">LOGIN</button>
+                        </div>
+
+                        {{#if error}}
+                        <div class="alert alert-danger">{{error}}</div>
+                        {{/if}}
+
+                    </form>
+                </div>
+
+                <div class="tab-pane fade" id="create" role="tabpanel" aria-labelledby="create-tab">
+                    {{#if WIF}}
+                    <div class="alert alert-warning" role="alert" style="margin-top: 1em;">
+                        <strong>Warning!</strong><br>If you want to keep this address then you should save this private key in a safe place. It won't be displayed again.
+                    </div>
+
+                    <p class="address-label">
+                        Address:<br><span class="address-data-label">{{address}}</span><span class="copy-pad"></span>
+                        <a href="#" onclick="Clipboard.copy('{{address}}')">
+                            <i class="fas fa-copy"></i>
+                        </a>
+                    </p>
+                    <p class="address-label">
+                        Private Key (WIF):<br><span class="address-data-label">{{WIF}}</span><span class="copy-pad"></span>
+                        <a href="#" onclick="Clipboard.copy('{{WIF}}')">
+                            <i class="fas fa-copy"></i>
+                        </a>
+                    </p>
+                    <button type="button" class="btn btn-primary btn-block btn-phantasma" onclick="location.href='/create'">GENERATE ANOTHER</button>
+                    {{#else}}
+                    <button type="button" class="btn btn-primary btn-block btn-phantasma" onclick="location.href='/create'">GENERATE ADDRESS</button>
+                    {{/if}}
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+    $(document).ready(
+
+      getSettings()
+
+    );
+
+    function getSettings() {
+
+      $.post('/config',
+            {
+                mode: 'get',
+            },
+        function (returnedData) {
+          if ((JSON.parse(returnedData)).theme) {
+            if (localStorage.getItem('themesetting') !== (JSON.parse(returnedData)).theme) {
+              localStorage.setItem('themesetting', (JSON.parse(returnedData)).theme);
+            }
+          }
+          if ((JSON.parse(returnedData)).currency) {
+            if (localStorage.getItem('currency') !== (JSON.parse(returnedData)).currency) {
+              localStorage.setItem('currency', (JSON.parse(returnedData)).currency);
+            }
+          }
+        }).fail(function(e) {
+           console.log(e);
+        })
+
+    }
+
+    function onLogin(){
+        var pk = document.getElementById("private_key");
+              //console.log(pk.value)
+        if (pk.value.length != 52) {
+            bootbox.alert("Invalid private key, must have 52 characters of length!");
+        } else {
+            window.location.replace("/login/"+pk.value);
+        }
+    }
+
+    $('#private_key').on('keyup keypress', function(e) {
+      var keyCode = e.keyCode || e.which;
+      if (keyCode === 13) {
+        e.preventDefault();
+        window.location.replace("/login/"+(document.getElementById("private_key")).value);
+      }
+    });
+
+
+    {{#if WIF}}
+    $('#myTab li:nth-child(2) a').tab('show');
+    {{#else}}
+    $('#myTab li:first-child a').tab('show');
+    {{/if}}
+    </script>
+
+</body>
+</html>

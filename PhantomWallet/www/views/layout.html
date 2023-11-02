@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Phantom Wallet</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Rubik:400,700&display=swap" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.css" integrity="sha256-fmMNkMcjSw3xcp9iuPnku/ryk9kaWgrEbfJfKmdZ45o=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flipclock/0.7.8/flipclock.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/tooltipster.bundle.min.css" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.4.0/bootbox.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.0/moment.min.js" integrity="sha256-Mwee5t+bD35zhwF9nGFf7szo0kMlILdBFdSK5xPQaTI=" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/datatables.net@1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flipclock/0.7.8/flipclock.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="../js/jquery.dd.min.js"></script>
+    <script src="../js/tooltipster.bundle.min.js"></script>
+
+    {{#css wallet}}
+    {{#javascript qrcode}}
+    {{#javascript wallet}}
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row content">
+            <div id="nameSpinner" class="loading">Loading&#8230;</div>
+            <div class="col-sm-2 sidenav hidden-xs" style="background-color: #17B0E7;">
+                <br />
+                <div class="media" style="padding-left:10%">
+                    <div class="media-left">
+                        <a href="#">
+                            <img src="/img/phantasma_logo_white.png" style="display: inline; height: 50px; margin-top: 10px; margin-right: 5px;" />
+                        </a>
+                    </div>
+                    <div class="media-body center" style="padding-right: 10%;">
+                        <span class="wallet-title">PHANTOM</span><br />
+                        <span class="wallet-subtitle">WALLET</span>
+                    </div>
+                </div>
+                <br />
+                <h6 class="center"><em>Wallet connected</em></h6>
+                {{#if name == 'anonymous'}}
+                <h5 class="center" style="color: darkslategrey;">
+                    {{name}}
+                    <a href="#" class="editbutton" id="editPencil"><i class="fa fa-pencil-alt" aria-hidden="true"></i></a>
+                </h5>
+                {{#else}}
+                <h5 class="center" style="color: darkslategrey;"><em>{{name}}</em></h5>
+                {{/if}}
+
+                <ul class="nav nav-pills nav-stacked">
+                    {{#each menu}}
+                    {{#if Enabled}}
+                    {{#if IsSelected}}
+                    {{#if Id == 'settings'}}
+                    <li style="display:none;" class="menu-item-highlight">
+                        <a href="/{{Id}}" style="color: #17B0E7; display: block; width: 100%;">
+                            <i class="fas {{Icon}} menu-icon"></i>{{Caption}}
+                        </a>
+                    </li>
+                    {{#else}}
+                    <li class="menu-item-highlight">
+                        <a href="/{{Id}}" style="color: #17B0E7; display: block; width: 100%;">
+                            <i class="fas {{Icon}} menu-icon"></i>{{Caption}}
+                        </a>
+                    </li>
+                    {{/if}}
+                    {{#else}}
+                    {{#if Id == 'settings'}}
+                    <li style="display:none;">
+                        <a href="/{{Id}}" style="display: block; width: 100%;">
+                            <i class="fas {{Icon}} menu-icon"></i>{{Caption}}
+                        </a>
+                    </li>
+                    {{#else}}
+                    <li>
+                        <a href="/{{Id}}" style="display: block; width: 100%;">
+                            <i class="fas {{Icon}} menu-icon"></i>{{Caption}}
+                        </a>
+                    </li>
+                    {{/if}}
+                    {{/if}}
+                    {{/if}}
+                    {{/each}}
+                </ul>
+                <div class="center"><div class="blockheight" id="blockheightparent">LAST BLOCK</div><div class="blockheight" id="blockheight" style="margin-left:.5em;"></div></div>
+                <div class="center" style="margin-top:-1em;"><div class="blockheight" id="soulpriceparent" style="font-size: 1em;">SOUL/USD</div><div class="blockheight" id="soulprice" style="margin-left:.5em;font-size: 1em;;"></div></div>
+                <div class="center"><div class="version" style="margin-top:-.3em;display:inline-block;">version 0.8.7</div><i id="settings-page" onclick="location.href='/settings';" class="fas fa-cog menu-icon" style="display: inline-block;margin-left: .5em;font-size: 1.3em;"></i></div>
+            </div>
+            <div class="col-md-10 col-sm-8">
+                <div class="well">{{#body}}</div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function () {
+            $('#nameSpinner').hide();
+        });
+    </script>
+</body>
+</html>
+
+

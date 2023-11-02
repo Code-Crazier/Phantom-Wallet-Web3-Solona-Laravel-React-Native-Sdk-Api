@@ -1,0 +1,317 @@
+<h3 class="tab-title">Contracts</h3>
+
+<div class="row setup-content contracts">
+    <div class="col-xs-12">
+        <div class="col-md-12">
+            <div class="col-md-4 col-md-offset-2 center" style="height:0;">
+              <h4>Step 1) Select chain</h4>
+              <select id="chaininput" style="width: 5em;height: 2.5em;">
+                {{#each chains}}
+                  <option value="{{Name}}">{{Name}}</option>
+                {{/each}}
+              </select>
+            </div>
+            <div class="col-md-4 center">
+              <h4>Step 2) Select contract</h4>
+              <select id="contractinput" style="width: 7em;height: 2.5em;"></select>
+            </div>
+            <div class="col-md-12 center">
+              <h4 id="methodinput-title">Step 3) Select method</h4>
+              <div id="loader-methods" class="block-loader center">
+                <div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+              </div>
+              <div id="methodinput" style="margin:1em;">
+              </div>
+            </div>
+            <div class="col-md-12 center">
+              <h4 id="parametersinput-title">Step 4) Enter parameters</h4>
+              <div id="loader-parameters" class="block-loader center">
+                <div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+              </div>
+              <div id="parametersinput">
+              </div>
+              <div id="wrapper-confirmrun">
+              </div>
+            </div>
+            <div class="col-md-12 center" style="margin:2em auto;" >
+              <h4 id="contractresult-title">Result</h4>
+              <pre id="contractresult" class="border rounded" style="width:33%;margin: 0 auto;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+$(document).ready(function() {
+
+  // Hide all on page init
+  $("#methodinput").hide();
+  $("#methodinput-title").hide();
+  $("#parametersinput").hide();
+  $("#parametersinput-title").hide();
+  $("#contractresult").hide();
+  $("#contractresult-title").hide();
+  $("#loader-methods").hide();
+  $("#loader-parameters").hide();
+  $("#wrapper-confirmrun").hide();
+  selectedchain = 'main';
+
+  // Init page on main chain
+  getChainContracts('step1-main')
+
+});
+
+// On chain change event
+$("#chaininput").change(function () {
+
+     var e = document.getElementById("chaininput");
+     var chain = 'step1-' + e.options[e.selectedIndex].value;
+     $("#methodinput").hide();
+     $("#methodinput-title").hide();
+     $("#parametersinput").hide();
+     $("#parametersinput-title").hide();
+     $("#contractresult").hide();
+     $("#contractresult-title").hide();
+     $("#loader-methods").hide();
+     $("#loader-parameters").hide();
+     $("#wrapper-confirmrun").hide();
+     getChainContracts(chain);
+
+ });
+
+// Get contracts based on chain selected
+function getChainContracts(chain) {
+
+     chain = chain.substr(6);
+     if ($(document.getElementById("step1-" + selectedchain))) {
+      $(document.getElementById("step1-" + selectedchain)).removeClass('selected-chain');
+     }
+     fetchValuesContracts = '';
+     selectedchain = chain;
+
+     $.get('/chains',
+       function (returnedData) {
+         // Filter returned contracts based on the chain selected
+         var matchingContracts = (JSON.parse(returnedData)).filter(function(matchChain) {
+          return matchChain.name == chain;
+         });
+         var clength = (matchingContracts[0].contracts).length,
+             i = 0;
+         // Start building the dropdown
+         for (i; i < clength; i += 1) {
+           fetchValuesContracts += '<option value="' + (matchingContracts[0].contracts)[i] + '">' + (matchingContracts[0].contracts)[i] + '</option>';
+         }
+         // Fill the dropdown
+         document.getElementById("contractinput").innerHTML = fetchValuesContracts;
+       }).fail(function(e) {
+          console.log(e);
+       });
+     // add class selected chain
+     $(document.getElementById("step1-" + chain)).addClass('selected-chain').delay(150).queue(function(next){});
+}
+
+// On chain change event
+$("#contractinput").change(function () {
+
+     $("#loader-methods").show();
+     var e = document.getElementById("contractinput");
+     var contract = e.options[e.selectedIndex].value;
+     fetchValuesMethod = '';
+     document.getElementById("methodinput").innerHTML = fetchValuesMethod;
+     $("#methodinput").show();
+     $("#methodinput-title").show();
+     $("#parametersinput").hide();
+     $("#parametersinput-title").hide();
+     $("#wrapper-confirmrun").hide();
+     $("#contractresult").hide();
+     $("#contractresult-title").hide();
+     getABI(contract);
+
+ });
+
+// Get methods per contract selected
+function getABI(contract) {
+
+    var e = document.getElementById("chaininput");
+    var chain = e.options[e.selectedIndex].value;
+    var f = document.getElementById("contractinput");
+    var contract = f.options[f.selectedIndex].value;
+    fetchValuesMethod = '';
+
+    $.post('/contract/abi',
+      {
+          chain: chain,
+          contract: contract
+      },
+      function (returnedData) {
+        abiFromContract = returnedData;
+        var methodslength = (JSON.parse(returnedData).methods).length,
+            i = 0;
+        // Start building the methods spans
+        for (i; i < methodslength; i += 1) {
+          fetchValuesMethod += '<span class="wrapper-methods button" id="step3-' + (JSON.parse(returnedData).methods)[i].name + '" onclick="getMethodParams(this.id)">' + (JSON.parse(returnedData).methods)[i].name + '</span>';
+        }
+        // If no methods returned, else generate the div
+        if (methodslength == 0) {
+          document.getElementById("methodinput").innerHTML = '<div style="margin:2em auto;">No methods available.</div>';
+        } else {
+          document.getElementById("methodinput").innerHTML = fetchValuesMethod;
+        }
+        $("#loader-methods").hide();
+      }).fail(function(e) {
+         console.log(e);
+      });
+
+}
+
+// Get parameters per method selected
+function getMethodParams(method) {
+
+    // Init and empty values on method change
+    $("#loader-parameters").show();
+    fetchValuesParams = '';
+    document.getElementById("parametersinput").innerHTML = fetchValuesParams;
+    $("#parametersinput").show();
+    $("#parametersinput-title").show();
+    $("#wrapper-confirmrun").show();
+    $("#contractresult").hide();
+    $("#contractresult-title").hide();
+    document.getElementById("contractresult").innerHTML = '';
+    method = method.substr(6);
+    // remove selected method (custom background and color)
+    if (typeof selectedmethod !== 'undefined') {
+      $(document.getElementById("step3-" + selectedmethod)).removeClass('selected-method');
+    }
+    // store selected method
+    selectedmethod = method;
+    // add selected method (custom background and color)
+    $(document.getElementById("step3-" + method)).addClass('selected-method').delay(150).queue(function(next){});
+    var matchingMethod = (JSON.parse(abiFromContract).methods).filter(function(matchedMethod) {
+      return matchedMethod.name == method;
+    });
+    var pLength = (matchingMethod[0].parameters).length,
+        i = 0;
+    // Start building the parameters inputs
+    for (i; i < pLength; i += 1) {
+      var input = matchingMethod[0].parameters[i].type;
+      fetchValuesParams += matchingMethod[0].parameters[i].name + ' - ' + input +'<div><input id="parametersinput-' + [i] + '" type="text" class="form-control parameters-input" placeholder="Enter parameter ' + [i+1] + '"</div>'
+    }
+    // If no parameters returned, else generate the div
+    if (fetchValuesParams !== '') {
+      document.getElementById("parametersinput").innerHTML = fetchValuesParams;
+    } else {
+      $("#parametersinput-title").hide();
+      document.getElementById("parametersinput").innerHTML = '<div style="margin:2em auto;">No parameters required.</div>'
+    }
+    document.getElementById("wrapper-confirmrun").innerHTML = '<button id="confirmrun-'+method+'" type="button" style="border-radius:0;" class="button" onclick="confirmRun(this.id)">RUN</button>';
+    $("#loader-parameters").hide();
+
+}
+
+// Confirm chain/contract/method/parameters execution
+function confirmRun(method) {
+
+  var e = document.getElementById("chaininput");
+  chain = e.options[e.selectedIndex].value;
+  var f = document.getElementById("contractinput");
+  contract = f.options[f.selectedIndex].value;
+  method = method.substr(11);
+  var matchingMethod = (JSON.parse(abiFromContract).methods).filter(function(matchedMethod) {
+    return matchedMethod.name == method;
+  });
+  var pLength = (matchingMethod[0].parameters).length,
+      i = 0;
+  var params = [];
+  // Loop over the parameters to know what to call in the /contract
+  for (i; i < pLength; i += 1) {
+    // Get the dynamic id for each parameter
+    paramsnumber = ((document.getElementById('parametersinput-' + [i])).value)
+    params[i] = { name: matchingMethod[0].parameters[i].name, type: matchingMethod[0].parameters[i].type, input: paramsnumber, info: '' }
+  }
+
+  $.post('/contract',
+     {
+         chain: chain,
+         contract: contract,
+         method: method,
+         params: JSON.stringify({
+           params
+         })
+     },
+     function (returnedData) {
+       // Currently we can not distinguish if we need /contract or /contract/tx, so if /contract returns null, it starts /contract/tx
+       if (returnedData == 'null') {
+         $.post('/contract/tx',
+             {
+                 chain: chain,
+                 contract: contract,
+                 method: method,
+                 params: JSON.stringify({
+                   params
+                 })
+             },
+             function (returnedData) {
+                //console.log(returnedData)
+                // If /contract/tx works, call /tx/hash to check if the tx worked
+                $.get('/tx/' + returnedData,
+                    function (returnedDataTX) {
+                      //console.log(JSON.parse(returnedDataTX).error)
+                      // If .error defined, returns the custom error message
+                      if ((JSON.parse(returnedDataTX).error) != undefined) {
+                        document.getElementById("contractresult").innerHTML = (JSON.parse(returnedDataTX).error);
+                      } else {
+                        // If it works, returns the tx link
+                        document.getElementById("contractresult").innerHTML = 'Transaction successful.<br><a href={{explorer}}/tx/' + returnedData + '" target="_blank" title="View Transaction">' + returnedData + '</a>';
+                      }
+                    }).fail(function(e) {
+                      console.log(e)
+                      document.getElementById("contractresult").innerHTML = e;
+                    });
+             }).fail(function(e) {
+                console.log(e)
+                document.getElementById("contractresult").innerHTML = e;
+             })
+       } else {
+         console.log(returnedData)
+         document.getElementById("contractresult").innerHTML = returnedData;
+       }
+     }).fail(function(e) {
+       console.log(e)
+       // Currently we can not distinguish if we need /contract or /contract/tx, so if /contract fails, it starts /contract/tx
+       $.post('/contract/tx',
+           {
+               chain: chain,
+               contract: contract,
+               method: method,
+               params: JSON.stringify({
+                 params
+               })
+           },
+           function (returnedData) {
+             if (returnedData.startsWith('0x')) {
+               $.get('/tx/' + returnedData,
+                   function (returnedDataTX) {
+                     // If confirmations > 0 (meaning tx is confirmed)
+                     if (JSON.parse(returnedDataTX).confirmations > 0) {
+                         document.getElementById("contractresult").innerHTML = 'Success. Transaction confirmed.<br><a href="{{explorer}}/tx/' + returnedData + '" target="_blank" title="View Transaction">' + returnedData + '</a>';
+                     } else {
+                       document.getElementById("contractresult").innerHTML = 'Error';
+                     }
+                   }).fail(function(e) {
+                      console.log(e);
+                      document.getElementById("contractresult").innerHTML = 'Error. <br>' + JSON.parse(e);
+                   });
+             }
+           }).fail(function(e) {
+              console.log(e);
+              document.getElementById("contractresult").innerHTML = 'Error. <br>' + JSON.parse(e);
+           });
+     });
+
+  $("#contractresult").show();
+  $("#contractresult-title").show();
+
+}
+
+</script>

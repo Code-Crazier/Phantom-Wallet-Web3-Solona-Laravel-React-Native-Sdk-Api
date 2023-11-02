@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>PHANTOM Paper Wallet</title>
+    <meta name="description" content="Paper wallet generator for Phantom cryptocurrency.">
+    <meta name="keywords" content="phantom,paperwallet,paper,wallet,cryptocurrency,phantom.org,crypti">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="third-party/bootswatch-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="lib/index.css">
+  </head>
+  <body ng-controller="main" ng-cloak>
+    <div class="container-fluid">
+      <div class="row noprint">
+        <div class="col-md-12 bg-band-grey">
+          <div class="page-header text-center logo"><a href="index.html"><img src="images/logo.png" title="Phantom Paper Wallet" alt="Phantom Paper Wallet"></a></div>
+        </div>
+        <div class="col-md-12 bg-band-grey title-container">
+          <div class="page-header text-center">
+            <h1 class="site-title">PHANTOM Paper Wallet</h1>
+            <h5 class="site-slogan">Generate Your Own Unique <a href="http://phantom.org" target="blank">PHANTOM</a> Passphrase and Address
+            </h5>
+          </div>
+        </div>
+      </div>
+      <entropy></entropy>
+      <wallet></wallet>
+      <div class="noprint">
+        <div class="footer text-center">Hosted by GitHub Pages. Source code is available <a href="https://github.com/PhantomChain/paper-wallet" target="blank">here</a>. You can download and run locally <a href="https://github.com/PhantomChain/paper-wallet/archive/master.zip" target="blank">here</a>.
+        </div>
+      </div>
+    </div>
+    <script type="text/ng-template" id="entropy">
+      <div ng-show="stage == 1 || stage == 1.5" class="container-fluid">
+        <div class="row noprint">
+          <div class="col-md-12 text-center wallet-icon"><img src="images/wallet.png"></div>
+        </div>
+      </div>
+      <div ng-show="stage == 1" class="row noprint btns">
+        <div class="col-md-12 text-center">
+          <button type="button" ng-click="random.start()" ng-disabled="btn_disabled" class="btn btn-info btn_primary">Create a new random wallet</button>
+        </div>
+        <div class="col-md-12 text-center">
+          <button type="button" ng-click="enter.start()" ng-disabled="btn_disabled" class="btn btn-info">Enter a secret passphrase</button>
+        </div>
+      </div>
+      <div ng-show="enter.started" class="row noprint stage-2">
+        <div class="col-md-6 col-md-offset-3 text-center">
+          <div class="form-group">
+            <input type="text" placeholder="enter your passphrase here" ng-model="enter.value" ng-keyup="enterKeyUp($event)" class="form-control input-lg text-center input_passphrase">
+          </div>
+          <button ng-disabled="!enter.valid" ng-click="enterGenerate()" class="btn btn-generate-from-passphrase">Generate</button>
+        </div>
+      </div>
+      <div class="row noprint generate-key">
+        <div ng-show="random.started" class="col-md-12">
+          <h4 class="text-center pulsaste">Move your mouse to generate random bytes</h4>
+          <uib-progressbar max="100" value="random.progress"></uib-progressbar>
+          <div class="bytes text-center">
+            <byte ng-repeat="byte in random.tmp track by $index" ng-data="byte" animate-on-change="byte"></byte>
+          </div>
+        </div>
+      </div>
+    </script>
+    <script type="text/ng-template" id="byte">
+      <div ng-bind="hex" class="hex"></div>
+      <div ng-bind="dec" class="dec"></div>
+    </script>
+    <script type="text/ng-template" id="wallet">
+      <div class="row noprint loading">
+        <div class="col-md-12">
+          <div class="cssload-loader"></div>
+        </div>
+      </div>
+      <div class="row after hidden print">
+        <div class="col-md-12">
+          <div class="address-block print-logo"><img src="images/logo.png" title="Phantom Paper Wallet" alt="Phantom Paper Wallet" class="print-logo"></div>
+        </div>
+      </div>
+      <div class="row after">
+        <div class="col-md-12">
+          <div class="address-block address-block-public">
+            <qrcode data="data.addressqr" size="100" class="primary visible-lg-block print"></qrcode>
+            <qrcode data="data.addressqr" size="200" class="mobile hidden-lg noprint"></qrcode>
+            <h5>Public Address (SHARE)</h5>
+            <div ng-bind="data.address" clipboard class="hash address"></div>
+            <div class="clearfix"></div>
+          </div>
+        </div>
+      </div>
+      <div class="row after">
+        <div class="col-md-12">
+          <div class="address-block">
+            <qrcode data="data.passphraseqr" size="100" class="primary visible-lg-block print"></qrcode>
+            <qrcode data="data.passphraseqr" size="200" class="mobile hidden-lg noprint"></qrcode>
+            <h5>Secret Passphrase (KEEP SAFE)</h5>
+            <div ng-bind="data.passphrase" clipboard class="hash passphrase"></div>
+            <div class="clearfix"></div>
+          </div>
+        </div>
+      </div>
+      <div class="row noprint after">
+        <div class="col-md-12">
+          <div class="key-data">
+            <div class="key-data-item">
+              <h5>Entropy</h5>
+              <p ng-bind="data.entropy" clipboard class="hash"></p>
+            </div>
+            <div class="key-data-item">
+              <h5>Public Key</h5>
+              <p ng-bind="data.publicKey" clipboard class="hash"></p>
+            </div>
+            <div class="key-data-item">
+              <h5>WIF</h5>
+              <p ng-bind="data.wif" clipboard class="hash"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row noprint after">
+        <div class="col-md-12 text-center">
+          <button type="button" ng-click="print()" class="btn btn-print"><span aria-hidden="true" class="glyphicon glyphicon-print"></span> Print
+          </button>
+          <button type="button" ng-click="save()" class="btn btn-save"><span aria-hidden="true" class="glyphicon glyphicon-download-alt"></span> Save
+          </button>
+        </div>
+      </div>
+    </script>
+    <script src="third-party/jquery/dist/jquery.min.js"></script>
+    <script src="third-party/jquery-qrcode/dist/jquery.qrcode.min.js"></script>
+    <script src="third-party/angular/angular.min.js"></script>
+    <script src="third-party/angular-animate/angular-animate.min.js"></script>
+    <script src="third-party/bootswatch-dist/js/bootstrap.min.js"></script>
+    <script src="third-party/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+    <script src="third-party/html2canvas/build/html2canvas.js"></script>
+    <script src="lib/wallet.js"></script>
+    <script src="lib/index.js"></script>
+    <script id="github-bjs" async defer src="https://buttons.github.io/buttons.js"></script>
+  </body>
+</html>

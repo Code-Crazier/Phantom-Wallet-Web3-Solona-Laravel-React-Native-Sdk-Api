@@ -1,0 +1,121 @@
+doctype html
+html.no-js
+  head
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge,chrome=1')
+    title PHANTOM Paper Wallet
+    meta(name='description', content='Paper wallet generator for Phantom cryptocurrency.')
+    meta(name='keywords', content='phantom,paperwallet,paper,wallet,cryptocurrency,phantom.org,crypti')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+
+    link(rel='shortcut icon', href='images/favicon.ico', type='image/x-icon')
+    link(rel='icon', href='images/favicon.ico', type='image/x-icon')
+    link(rel='stylesheet', href='third-party/bootswatch-dist/css/bootstrap.min.css')
+    link(rel='stylesheet', href='lib/index.css')
+  body(ng-controller='main', ng-cloak)
+    .container-fluid
+      .row.noprint
+        .col-md-12.bg-band-grey
+          .page-header.text-center.logo
+            a(href='index.html')
+              img(src='images/logo.png', title='Phantom Paper Wallet', alt='Phantom Paper Wallet')
+        .col-md-12.bg-band-grey.title-container
+          .page-header.text-center
+            h1.site-title
+              | PHANTOM Paper Wallet
+            h5.site-slogan
+              = 'Generate Your Own Unique '
+              a(href='http://phantom.org', target='blank') PHANTOM
+              = ' Passphrase and Address'
+
+      entropy
+      wallet
+
+      div.noprint
+        .footer.text-center
+          = 'Hosted by GitHub Pages. Source code is available '
+          a(href='https://github.com/PhantomChain/paper-wallet', target='blank') here
+          = '. You can download and run locally '
+          a(href='https://github.com/PhantomChain/paper-wallet/archive/master.zip', target='blank') here
+          = '.'
+
+    script(type='text/ng-template', id='entropy')
+      .container-fluid(ng-show='stage == 1 || stage == 1.5')
+        .row.noprint
+          .col-md-12.text-center.wallet-icon()
+            img(src="images/wallet.png")
+      .row.noprint.btns(ng-show='stage == 1')
+        .col-md-12.text-center
+          button.btn.btn-info.btn_primary(type='button', ng-click='random.start()', ng-disabled='btn_disabled') Create a new random wallet
+        .col-md-12.text-center
+          button.btn.btn-info(type='button', ng-click='enter.start()', ng-disabled='btn_disabled') Enter a secret passphrase
+      .row.noprint.stage-2(ng-show='enter.started')
+        .col-md-6.col-md-offset-3.text-center
+          .form-group: input.form-control.input-lg.text-center.input_passphrase(type='text', placeholder='enter your passphrase here', ng-model='enter.value', ng-keyup='enterKeyUp($event)')
+          button.btn.btn-generate-from-passphrase(ng-disabled='!enter.valid', ng-click='enterGenerate()') Generate
+      .row.noprint.generate-key
+        .col-md-12(ng-show='random.started')
+          h4.text-center.pulsaste Move your mouse to generate random bytes
+          uib-progressbar(max='100', value='random.progress')
+          .bytes.text-center
+            byte(ng-repeat='byte in random.tmp track by $index', ng-data='byte', animate-on-change='byte')
+
+    script(type='text/ng-template', id='byte')
+      .hex(ng-bind='hex')
+      .dec(ng-bind='dec')
+
+    script(type='text/ng-template', id='wallet')
+      .row.noprint.loading
+        .col-md-12
+          .cssload-loader
+      .row.after.hidden.print
+        .col-md-12
+          .address-block.print-logo
+            img.print-logo(src='images/logo.png', title='Phantom Paper Wallet', alt='Phantom Paper Wallet')
+      .row.after
+        .col-md-12
+          .address-block.address-block-public
+            qrcode.primary.visible-lg-block.print(data='data.addressqr', size='100')
+            qrcode.mobile.hidden-lg.noprint(data='data.addressqr', size='200')
+            h5 Public Address (SHARE)
+            .hash.address(ng-bind='data.address', clipboard)
+            .clearfix
+      .row.after
+        .col-md-12
+          .address-block
+            qrcode.primary.visible-lg-block.print(data='data.passphraseqr', size='100')
+            qrcode.mobile.hidden-lg.noprint(data='data.passphraseqr', size='200')
+            h5 Secret Passphrase (KEEP SAFE)
+            .hash.passphrase(ng-bind='data.passphrase', clipboard)
+            .clearfix
+      .row.noprint.after
+        .col-md-12
+          .key-data
+            .key-data-item
+              h5 Entropy
+              p.hash(ng-bind='data.entropy', clipboard)
+            .key-data-item
+              h5 Public Key
+              p.hash(ng-bind='data.publicKey', clipboard)
+            .key-data-item
+              h5 WIF
+              p.hash(ng-bind='data.wif', clipboard)
+      .row.noprint.after
+        .col-md-12.text-center
+          button.btn.btn-print(type='button', ng-click='print()')
+            span.glyphicon.glyphicon-print(aria-hidden='true')
+            = ' Print'
+          button.btn.btn-save(type='button', ng-click='save()')
+            span.glyphicon.glyphicon-download-alt(aria-hidden='true')
+            = ' Save'
+
+    script(src='third-party/jquery/dist/jquery.min.js')
+    script(src='third-party/jquery-qrcode/dist/jquery.qrcode.min.js')
+    script(src='third-party/angular/angular.min.js')
+    script(src='third-party/angular-animate/angular-animate.min.js')
+    script(src='third-party/bootswatch-dist/js/bootstrap.min.js')
+    script(src='third-party/angular-bootstrap/ui-bootstrap-tpls.min.js')
+    script(src='third-party/html2canvas/build/html2canvas.js')
+    script(src='lib/wallet.js')
+    script(src='lib/index.js')
+    script#github-bjs(async, defer, src='https://buttons.github.io/buttons.js')

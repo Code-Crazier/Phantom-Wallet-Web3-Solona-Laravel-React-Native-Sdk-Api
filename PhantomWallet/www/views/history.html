@@ -1,0 +1,202 @@
+<h3 class="tab-title">Transactions History</h3>
+<div class="history">
+
+  {{#if confirmedHash}}
+  <div class="alert alert-success" style="overflow: auto">
+      The transaction <a href="{{explorer}}/tx/{{confirmedHash}}" target="_blank">{{confirmedHash}}</a> was sent with <strong>success</strong>!
+  </div>
+  {{/if}}
+
+  {{#if transactions}}
+  <div class="table-responsive">
+      <table class="table table-striped" id="mainhistorytable" style="display:none;width:100%;">
+          <thead>
+              <tr>
+                  <th class="col-1" style="">Type</th>
+                  <th class="col-2">Date (UTC)</th>
+                  <th class="col-3">Hash</th>
+                  <th class="col-4">Amount</th>
+                  <th class="col-5" style="">Description</th>
+              </tr>
+          </thead>
+          <tbody>
+              {{#each transactions}}
+              <tr>
+                  <td class="col-1" style="">
+                    {{#if Type == 'Mint'}}
+                      <i class="fas fa-coins" style="color:#7cacff"><span style="display:none;">{{Type}}</span></i>
+                    {{#else}}
+                      {{#if Type == address}}
+                        <i class="fas fa-sign-out-alt" style="color:#e3637d"><span style="display:none;">{{Type}}</span></i>
+                      {{#else}}
+                        {{#if Type == 'Custom'}}
+                          <i class="fas fa-file-signature" style="color:#c9c1ed"><span style="display:none;">{{Type}}</span></i>
+                        {{#else}}
+                          <i class="fas fa-sign-in-alt" style="color:#4edb6a"><span style="display:none;">{{Type}}</span></i>
+                        {{/if}}
+                      {{/if}}
+                    {{/if}}
+                  </td>
+                  <td class="col-2">{{Date}}</td>
+                  <td class="col-3"><small><a href="{{explorer}}/tx/{{Hash}}" target="_blank" title="View Transaction">{{Hash}}</a></small></td>
+                  <td class="col-4">{{Amount}}</td>
+                  <td class="col-5" style="">{{Description}}</td>
+              </tr>
+              {{/each}}
+          </tbody>
+      </table>
+  </div>
+</div>
+
+{{#else}}
+<div class="alert alert-info" role="alert" id="historynewaccount">
+    This address is still new and does not have any transaction yet.
+</div>
+{{/if}}
+
+<script>
+
+  $(document).ready(function() {
+
+    initTables();
+
+  });
+
+  // Datatable initialization
+  function initTables() {
+      if (!$.fn.dataTable.isDataTable('#mainhistorytable')) {
+          setTimeout(function() {
+              jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+                  // custom ordering
+                  "non-empty-string-asc": function(str1, str2) {
+                      if (str1 == null || str1 == "") return 1;
+                      if (str2 == null || str2 == "") return -1;
+                      return ((str1 < str2) ? -1 : ((str1 > str2) ? 1 : 0))
+                  },
+                  "non-empty-string-desc": function(str1, str2) {
+                      if (str1 == null || str1 == "") return 1;
+                      if (str2 == null || str2 == "") return -1;
+                      return ((str1 < str2) ? 1 : ((str1 > str2) ? -1 : 0))
+                  },
+                  "currency-pre": function(a) {
+                      a = (a === "-") ? 0 : a.replace(/[^\d\-\.]/g, "");
+                      return parseFloat(a)
+                  },
+                  "currency-asc": function(a, b) {
+                      return a - b
+                  },
+                  "currency-desc": function(a, b) {
+                      return b - a
+                  }
+              });
+              $('#mainhistorytable').DataTable({
+                  // adjust command and dot and replace default texts
+                  "language": {
+                      "decimal": ".",
+                      "thousands": ",",
+                      search: "<i class='fas fa-search'></i>",
+                      searchPlaceholder: "Transaction",
+                      zeroRecords: "No matching transaction found"
+                  },
+                  "bPaginate": !0,
+                  "pageLength": 10,
+                  "aaSorting": [],
+                  // start ordering on column 1
+                  "order": [1, "desc"],
+                  // custom column defs
+                  "columnDefs": [{
+                      type: 'natural',
+                      targets: [1]
+                  },{
+                      type: 'non-empty-string',
+                      targets: [3]
+                  }, {
+                      type: 'currency',
+                      targets: [3]
+                  }, {
+                    // prevent searchable on column 0
+                    searchable: false,
+                    targets: [0]
+                  }],
+                  // show datatable only after its fully initialized
+                  "initComplete": function() {
+                      $(this).show()
+                  }
+              })
+          }, 100)
+      }
+  }
+
+  (function() {
+  function naturalSort (a, b, html) {
+  	var re = /(^-?[0-9]+(\.?[0-9]*)[df]?e?[0-9]?%?$|^0x[0-9a-f]+$|[0-9]+)/gi,
+  		sre = /(^[ ]*|[ ]*$)/g,
+  		dre = /(^([\w ]+,?[\w ]+)?[\w ]+,?[\w ]+\d+:\d+(:\d+)?[\w ]?|^\d{1,4}[\/\-]\d{1,4}[\/\-]\d{1,4}|^\w+, \w+ \d+, \d{4})/,
+  		hre = /^0x[0-9a-f]+$/i,
+  		ore = /^0/,
+  		htmre = /(<([^>]+)>)/ig,
+  		x = a.toString().replace(sre, '') || '',
+  		y = b.toString().replace(sre, '') || '';
+  		if (!html) {
+  			x = x.replace(htmre, '');
+  			y = y.replace(htmre, '');
+  		}
+  	var	xN = x.replace(re, '\0$1\0').replace(/\0$/,'').replace(/^\0/,'').split('\0'),
+  		yN = y.replace(re, '\0$1\0').replace(/\0$/,'').replace(/^\0/,'').split('\0'),
+  		xD = parseInt(x.match(hre), 10) || (xN.length !== 1 && x.match(dre) && Date.parse(x)),
+  		yD = parseInt(y.match(hre), 10) || xD && y.match(dre) && Date.parse(y) || null;
+  	if (yD) {
+  		if ( xD < yD ) {
+  			return -1;
+  		}
+  		else if ( xD > yD )	{
+  			return 1;
+  		}
+  	}
+  	for(var cLoc=0, numS=Math.max(xN.length, yN.length); cLoc < numS; cLoc++) {
+  		var oFxNcL = !(xN[cLoc] || '').match(ore) && parseFloat(xN[cLoc], 10) || xN[cLoc] || 0;
+  		var oFyNcL = !(yN[cLoc] || '').match(ore) && parseFloat(yN[cLoc], 10) || yN[cLoc] || 0;
+  		if (isNaN(oFxNcL) !== isNaN(oFyNcL)) {
+  			return (isNaN(oFxNcL)) ? 1 : -1;
+  		}
+  		else if (typeof oFxNcL !== typeof oFyNcL) {
+  			oFxNcL += '';
+  			oFyNcL += '';
+  		}
+  		if (oFxNcL < oFyNcL) {
+  			return -1;
+  		}
+  		if (oFxNcL > oFyNcL) {
+  			return 1;
+  		}
+  	}
+  	return 0;
+  }
+  jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+  	"natural-asc": function ( a, b ) {
+  		return naturalSort(a,b,true);
+  	},
+  	"natural-desc": function ( a, b ) {
+  		return naturalSort(a,b,true) * -1;
+  	},
+  	"natural-nohtml-asc": function( a, b ) {
+  		return naturalSort(a,b,false);
+  	},
+  	"natural-nohtml-desc": function( a, b ) {
+  		return naturalSort(a,b,false) * -1;
+  	},
+  	"natural-ci-asc": function( a, b ) {
+  		a = a.toString().toLowerCase();
+  		b = b.toString().toLowerCase();
+  		return naturalSort(a,b,true);
+  	},
+  	"natural-ci-desc": function( a, b ) {
+  		a = a.toString().toLowerCase();
+  		b = b.toString().toLowerCase();
+
+  		return naturalSort(a,b,true) * -1;
+  	}
+  } );
+  }());
+
+</script>

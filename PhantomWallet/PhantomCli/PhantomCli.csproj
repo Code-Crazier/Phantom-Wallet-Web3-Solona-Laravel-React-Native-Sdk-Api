@@ -1,0 +1,58 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>netcoreapp2.0</TargetFramework>
+        <RuntimeFrameworkVersion>2.0</RuntimeFrameworkVersion>
+        <AssemblyName>PhantomCli</AssemblyName>
+        <RootNamespace>PhantomCli</RootNamespace>
+        <PackageId>PhantomCli</PackageId>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <OutputPath>bin\</OutputPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\PhantomWallet\Phantom.Wallet.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Properties\" />
+    </ItemGroup>
+
+    <Target Name="PackageWallet" AfterTargets="Publish">
+        <Message Text="OS=$([System.Runtime.InteropServices.RuntimeInformation]::OSDescription)" Importance="high"></Message>
+
+        <Message Text="Creating output directory..." Importance="high"></Message>
+        <MakeDir Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))" Directories="$(SolutionDir)bin/linux/" />
+        <MakeDir Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))" Directories="$(SolutionDir)bin/osx/" />
+	<MakeDir Condition="'$(OS)' == 'Windows_NT'" Directories="$(ProjectDir)..\bin\win\" />
+
+        <Message Text="Packaging wallet now..." Importance="high"></Message>
+        
+        <Exec Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))"
+            Command="$(SolutionDir)third-party/warp-packer_linux --arch linux-x64 --input_dir $(SolutionDir)PhantomCli/bin/Release/netcoreapp2.0/linux-x64/publish/ --exec PhantomCli --output $(SolutionDir)bin/linux/PhantomCli"></Exec>
+
+        <Exec Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))"
+            Command="$(SolutionDir)third-party/warp-packer_osx --arch macos-x64 --input_dir $(SolutionDir)PhantomCli/bin/Release/netcoreapp2.0/osx-x64/publish/ --exec PhantomCli --output $(SolutionDir)bin/osx/PhantomCli"></Exec>
+
+        <Exec Condition="'$(OS)' == 'Windows_NT'"
+		Command="$(SolutionDir)third-party\warp-packer_win.exe --arch windows-x64 --input_dir $(ProjectDir)..\PhantomCli\bin\Release\netcoreapp2.0\win-x64\publish\ --exec PhantomCli.exe --output $(ProjectDir)..\bin\win\PhantomCli.exe"></Exec>
+    </Target>
+
+    <ItemGroup>
+        <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
+        <PackageReference Include="System.Runtime.Handles" Version="4.3.0" />
+        <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
+        <PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />
+        <ProjectReference Include="..\..\PhantasmaChain\Phantasma.CodeGen\Phantasma.CodeGen.csproj" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+        <PackageReference Include="Serilog" Version="2.8.0" />
+        <PackageReference Include="Serilog.Sinks.ColoredConsole" Version="3.0.1" />
+        <PackageReference Include="Serilog.Sinks.File" Version="4.0.0" />
+    </ItemGroup>
+
+</Project>

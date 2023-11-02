@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Phantom.Wallet": {
+      "commandName": "Project",
+      "commandLineArgs": "--path=. --port=7071",
+      "workingDirectory": "www"
+    }
+  }
+}

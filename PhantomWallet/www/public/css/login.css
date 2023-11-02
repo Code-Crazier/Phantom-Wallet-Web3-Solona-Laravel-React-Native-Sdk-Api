@@ -1,0 +1,177 @@
+@import url('https://fonts.googleapis.com/css?family=Rubik');
+
+@media screen and (min-width: 1281px) and (max-width: 1700px) {
+
+  .address-data-label {
+    font-size: 10px !important;
+  }
+
+  #logo-container {
+    min-width: initial !important;
+  }
+
+}
+
+@media screen and (max-width: 1280px) {
+
+    .container-fluid {
+        margin: 2px !important;
+    }
+
+    #logo-container {
+        min-width: 100% !important;
+    }
+
+}
+
+body {
+    font-family: "Rubik";
+    background-image: url('../img/background.png');
+    background-repeat: no-repeat;
+    background-color: white;
+    background-size: 100%;
+}
+
+div.well {
+    height: 300px;
+}
+
+.container-table {
+    display: table;
+}
+
+.container-fluid {
+    margin: 60px;
+}
+
+#logo-container {
+    margin: auto;
+    margin-bottom: 70px;
+    min-width: 400px;
+    max-width: 850px;
+    height: 200px;
+}
+
+#logo-img {
+    width: 200px;
+    height: 200px;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+.copy-pad {
+    display: inline-block;
+    width: 6px;
+    height: 10px;
+}
+
+.btn-phantasma {
+    color: #fff;
+    background-color: #17B0E7;
+    border: none;
+    border-radius: 0px;
+    padding: 20px;
+    font-weight: bold;
+    margin-top: 40px;
+}
+
+.login-label {
+    font-size: 12px;
+    line-height: 17px;
+    color: #7C95AB;
+    padding-bottom: 1em;
+}
+
+#loginForm {
+    margin-top:2em;
+}
+
+.address-label {
+    color: #7C95AB;
+    margin-bottom: 20px;
+    margin-top: 20px;
+    font-size: 12px;
+    overflow: auto;
+}
+
+.address-data-label {
+    color: #7C95AB;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+.alert-warning {
+    font-size: 12px;
+}
+
+.login-panel {
+    padding: 30px;
+    -webkit-box-shadow: 0px 0px 15px 10px rgba(216,216,216,0.25);
+    -moz-box-shadow: 0px 0px 15px 10px rgba(216,216,216,0.25);
+    box-shadow: 0px 0px 15px 10px rgba(216,216,216,0.25);
+    background-color: white;
+    overflow: hidden;
+}
+
+.shadow-box {
+    -webkit-box-shadow: 0px 0px 15px 10px rgba(216,216,216,0.25);
+    -moz-box-shadow: 0px 0px 15px 10px rgba(216,216,216,0.25);
+    box-shadow: 0px 0px 15px 10px rgba(216,216,216,0.25);
+}
+
+.tab-shadow {
+    -webkit-box-shadow: 0px -5px 10px 0px rgba(216,216,216,1);
+    -moz-box-shadow: 0px -5px 10px 0px rgba(216,216,216,1);
+    box-shadow: 0px -5px 10px 0px rgba(216,216,216,1);
+}
+
+.borderless-input {
+    border-radius: 0px;
+    border: 0px;
+    color: #7C95AB;
+    font-size: 20px;
+}
+
+.nav-tabs {
+    border-bottom: 1px solid #fff;
+    margin-top: 80px;
+}
+
+.nav-tabs {
+    border-bottom: 1px solid #fff;
+    margin-top: 80px;
+}
+
+    .nav-tabs > li.active > a {
+        color: #17B0E7 !important;
+        font-size: 14px;
+        font-weight: 600;
+        border: none;
+    }
+
+        .nav-tabs > li.active > a:hover {
+            border: none;
+        }
+
+        .nav-tabs > li.active > a:focus {
+            border: none;
+        }
+
+    .nav-tabs > li > a {
+        color: #7C95AB !important;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+        .nav-tabs > li > a:focus {
+            border: none;
+        }
+
+li.active {
+    -webkit-box-shadow: 0px -6px 10px 1px rgba(216,216,216,0.25);
+    -moz-box-shadow: 0px -6px 10px 1px rgba(216,216,216,0.25);
+    box-shadow: 0px -6px 10px 1px rgba(216,216,216,0.25);
+    overflow: hidden;
+}
